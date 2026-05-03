@@ -66,6 +66,13 @@
       pointer-events: none;
     }
 
+    .page.exiting-right {
+      display: block;
+      opacity: 0;
+      transform: translateX(30px);
+      pointer-events: none;
+    }
+
     h1 {
       font-size: 2.4rem;
       font-weight: 700;
@@ -196,6 +203,32 @@
     .btn:hover { background: #3da89e; }
     .btn:disabled { background: #a0cdc9; cursor: not-allowed; }
 
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #1A1A1A;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-right: 12px;
+    }
+
+    .btn-back:hover { background: #333; }
+
+    .btn-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
     .thankyou-heading {
       font-size: 2rem;
       font-weight: 700;
@@ -213,7 +246,33 @@
       font-size: 1rem;
       color: #807124;
       font-weight: 400;
+      margin-bottom: 28px;
     }
+
+    .countdown-msg {
+      font-size: 0.9rem;
+      color: #999;
+      margin-bottom: 16px;
+    }
+
+    .btn-proceed {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #1A1A1A;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+
+    .btn-proceed:hover { background: #333; }
 
     @media (max-width: 480px) {
       h1 { font-size: 1.8rem; }
@@ -260,7 +319,10 @@
         </div>
       </div>
       <p class="error-msg" id="q1-error">Please select at least one option to continue.</p>
-      <button class="btn" onclick="nextWithValidation('q1', 'page-3')">Next &rarr;</button>
+      <div class="btn-row">
+        <button class="btn-back" onclick="goBack()">&larr; Back</button>
+        <button class="btn" onclick="nextWithValidation('q1', 'page-3')">Next &rarr;</button>
+      </div>
     </div>
 
     <!-- Page 3: Q2 -->
@@ -281,7 +343,10 @@
         </div>
       </div>
       <p class="error-msg" id="q2-error">Please select at least one option to continue.</p>
-      <button class="btn" onclick="nextWithValidation('q2', 'page-4')">Next &rarr;</button>
+      <div class="btn-row">
+        <button class="btn-back" onclick="goBack()">&larr; Back</button>
+        <button class="btn" onclick="nextWithValidation('q2', 'page-4')">Next &rarr;</button>
+      </div>
     </div>
 
     <!-- Page 4: Q3 -->
@@ -302,7 +367,10 @@
         </div>
       </div>
       <p class="error-msg" id="q3-error">Please select at least one option to continue.</p>
-      <button class="btn" onclick="nextWithValidation('q3', 'page-5')">Next &rarr;</button>
+      <div class="btn-row">
+        <button class="btn-back" onclick="goBack()">&larr; Back</button>
+        <button class="btn" onclick="nextWithValidation('q3', 'page-5')">Next &rarr;</button>
+      </div>
     </div>
 
     <!-- Page 5: Email -->
@@ -316,7 +384,10 @@
         autocomplete="email"
       />
       <p class="error-msg" id="email-error">Please enter a valid email address.</p>
-      <button class="btn" id="submit-btn" onclick="handleSubmit()">Send Me My Results &rarr;</button>
+      <div class="btn-row">
+        <button class="btn-back" onclick="goBack()">&larr; Back</button>
+        <button class="btn" id="submit-btn" onclick="handleSubmit()">Send Me My Results &rarr;</button>
+      </div>
     </div>
 
     <!-- Page 6: Thank You -->
@@ -327,6 +398,8 @@
         understand your skin first, so expect to hear from us directly.
       </p>
       <p class="thankyou-accent">This isn't a waitlist. You're part of what gets built.</p>
+      <p class="countdown-msg" id="countdown-msg">Redirecting to Mivera in <strong id="countdown-num">10</strong>s</p>
+      <a class="btn-proceed" href="https://mivera.skin">Proceed to Mivera &rarr;</a>
     </div>
 
   </div>
@@ -334,6 +407,7 @@
   <script>
     const answers = { q1: [], q2: [], q3: [] };
     let transitioning = false;
+    const history = [];
 
     function goTo(nextId) {
       if (transitioning) return;
@@ -342,6 +416,7 @@
       const current = document.querySelector('.page.active');
       const next = document.getElementById(nextId);
 
+      history.push(current.id);
       current.classList.add('exiting');
 
       setTimeout(() => {
@@ -352,6 +427,31 @@
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             next.classList.add('active');
+            window.scrollTo(0, 0);
+            transitioning = false;
+          });
+        });
+      }, 320);
+    }
+
+    function goBack() {
+      if (transitioning || history.length === 0) return;
+      transitioning = true;
+
+      const current = document.querySelector('.page.active');
+      const prevId = history.pop();
+      const prev = document.getElementById(prevId);
+
+      current.classList.add('exiting-right');
+
+      setTimeout(() => {
+        current.classList.remove('active', 'exiting-right');
+        current.style.display = 'none';
+        prev.style.display = 'block';
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            prev.classList.add('active');
             window.scrollTo(0, 0);
             transitioning = false;
           });
@@ -392,6 +492,19 @@
       if (votes.reactive >= votes.barrier && votes.reactive >= votes.structural) return 'Reactive Transition Skin';
       if (votes.barrier >= votes.structural) return 'Barrier-Stripped Skin';
       return 'Structural Shift Skin';
+    }
+
+    function startCountdown() {
+      let secs = 10;
+      const numEl = document.getElementById('countdown-num');
+      const interval = setInterval(() => {
+        secs--;
+        numEl.textContent = secs;
+        if (secs <= 0) {
+          clearInterval(interval);
+          window.location.href = 'https://mivera.skin';
+        }
+      }, 1000);
     }
 
     function isValidEmail(email) {
@@ -448,6 +561,7 @@
 
         if (!res.ok) throw new Error('Server error');
         goTo('page-6');
+        startCountdown();
       } catch {
         btn.disabled = false;
         btn.textContent = 'Send Me My Results →';
