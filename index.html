@@ -22,15 +22,17 @@
       border-bottom: 1px solid #f0f0f0;
     }
 
-    .site-header p {
+    .site-header .brand {
       font-size: 12px;
-      color: #999;
+      color: #4DB6AC;
       line-height: 1.4;
     }
 
     .site-header a {
+      font-size: 12px;
       color: #999;
       text-decoration: none;
+      display: block;
     }
 
     .quiz-wrap {
@@ -39,10 +41,30 @@
       width: 100%;
       margin: 0 auto;
       padding: 60px 24px 80px;
+      overflow: hidden;
     }
 
-    .page { display: none; }
-    .page.active { display: block; }
+    .page {
+      opacity: 0;
+      transform: translateX(30px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      pointer-events: none;
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: all;
+    }
+
+    .page.exiting {
+      display: block;
+      opacity: 0;
+      transform: translateX(-30px);
+      pointer-events: none;
+    }
 
     h1 {
       font-size: 2.4rem;
@@ -111,6 +133,7 @@
       font-weight: 700;
       color: #555;
       flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
     }
 
     .option.selected .option-letter {
@@ -201,7 +224,8 @@
 <body>
 
   <header class="site-header">
-    <p>Custom Skincare Matters.<br><a href="https://mivera.skin">mivera.skin</a></p>
+    <span class="brand">Custom Skincare Matters.</span>
+    <a href="https://mivera.skin">mivera.skin</a>
   </header>
 
   <div class="quiz-wrap">
@@ -235,7 +259,7 @@
           <span class="option-text">Lost firmness or texture I can't explain</span>
         </div>
       </div>
-      <p class="error-msg" id="q1-error">Please select an option to continue.</p>
+      <p class="error-msg" id="q1-error">Please select at least one option to continue.</p>
       <button class="btn" onclick="nextWithValidation('q1', 'page-3')">Next &rarr;</button>
     </div>
 
@@ -256,7 +280,7 @@
           <span class="option-text">More than 2 years</span>
         </div>
       </div>
-      <p class="error-msg" id="q2-error">Please select an option to continue.</p>
+      <p class="error-msg" id="q2-error">Please select at least one option to continue.</p>
       <button class="btn" onclick="nextWithValidation('q2', 'page-4')">Next &rarr;</button>
     </div>
 
@@ -277,7 +301,7 @@
           <span class="option-text">I've mostly stopped trying new products</span>
         </div>
       </div>
-      <p class="error-msg" id="q3-error">Please select an option to continue.</p>
+      <p class="error-msg" id="q3-error">Please select at least one option to continue.</p>
       <button class="btn" onclick="nextWithValidation('q3', 'page-5')">Next &rarr;</button>
     </div>
 
@@ -308,24 +332,50 @@
   </div>
 
   <script>
-    const answers = { q1: null, q2: null, q3: null };
+    const answers = { q1: [], q2: [], q3: [] };
+    let transitioning = false;
 
-    function goTo(pageId) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById(pageId).classList.add('active');
-      window.scrollTo(0, 0);
+    function goTo(nextId) {
+      if (transitioning) return;
+      transitioning = true;
+
+      const current = document.querySelector('.page.active');
+      const next = document.getElementById(nextId);
+
+      current.classList.add('exiting');
+
+      setTimeout(() => {
+        current.classList.remove('active', 'exiting');
+        current.style.display = 'none';
+        next.style.display = 'block';
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            next.classList.add('active');
+            window.scrollTo(0, 0);
+            transitioning = false;
+          });
+        });
+      }, 320);
     }
 
     function selectOption(question, el) {
-      const group = document.getElementById(question + '-options');
-      group.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
-      el.classList.add('selected');
-      answers[question] = el.dataset.value;
+      const value = el.dataset.value;
+      const idx = answers[question].indexOf(value);
+
+      if (idx > -1) {
+        answers[question].splice(idx, 1);
+        el.classList.remove('selected');
+      } else {
+        answers[question].push(value);
+        el.classList.add('selected');
+      }
+
       document.getElementById(question + '-error').style.display = 'none';
     }
 
     function nextWithValidation(question, nextPage) {
-      if (!answers[question]) {
+      if (answers[question].length === 0) {
         document.getElementById(question + '-error').style.display = 'block';
         return;
       }
@@ -333,11 +383,15 @@
     }
 
     function getSkinType() {
-      const q1 = answers.q1;
-      if (q1 === 'A' || q1 === 'C') return 'Reactive Transition Skin';
-      if (q1 === 'B') return 'Barrier-Stripped Skin';
-      if (q1 === 'D') return 'Structural Shift Skin';
-      return 'Unknown';
+      const votes = { reactive: 0, barrier: 0, structural: 0 };
+      answers.q1.forEach(v => {
+        if (v === 'A' || v === 'C') votes.reactive++;
+        if (v === 'B') votes.barrier++;
+        if (v === 'D') votes.structural++;
+      });
+      if (votes.reactive >= votes.barrier && votes.reactive >= votes.structural) return 'Reactive Transition Skin';
+      if (votes.barrier >= votes.structural) return 'Barrier-Stripped Skin';
+      return 'Structural Shift Skin';
     }
 
     function isValidEmail(email) {
@@ -376,15 +430,18 @@
         C: "I've mostly stopped trying new products"
       };
 
+      const mapLabels = (question, labelMap) =>
+        answers[question].map(v => labelMap[v]).join(', ');
+
       try {
         const res = await fetch('/.netlify/functions/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             email,
-            q1: q1Labels[answers.q1],
-            q2: q2Labels[answers.q2],
-            q3: q3Labels[answers.q3],
+            q1: mapLabels('q1', q1Labels),
+            q2: mapLabels('q2', q2Labels),
+            q3: mapLabels('q3', q3Labels),
             skinType: getSkinType()
           })
         });
