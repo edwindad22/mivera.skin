@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>What's Happening to Your Skin? | Mivera</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #ffffff;
+      color: #1A1A1A;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .site-header {
+      padding: 16px 40px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .site-header p {
+      font-size: 12px;
+      color: #999;
+      line-height: 1.4;
+    }
+
+    .site-header a {
+      color: #999;
+      text-decoration: none;
+    }
+
+    .quiz-wrap {
+      flex: 1;
+      max-width: 680px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: #1A1A1A;
+      line-height: 1.2;
+      margin-bottom: 28px;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1A1A1A;
+      line-height: 1.3;
+      margin-bottom: 10px;
+    }
+
+    .sub {
+      font-size: 1rem;
+      color: #1A1A1A;
+      margin-bottom: 32px;
+    }
+
+    .question {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1A1A1A;
+      margin-bottom: 24px;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 14px 18px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      user-select: none;
+    }
+
+    .option:hover { border-color: #4DB6AC; }
+
+    .option.selected {
+      border-color: #4DB6AC;
+      background: #f0faf9;
+    }
+
+    .option-letter {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: #e8e8e8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #555;
+      flex-shrink: 0;
+    }
+
+    .option.selected .option-letter {
+      background: #4DB6AC;
+      color: #fff;
+    }
+
+    .option-text {
+      font-size: 1rem;
+      color: #1A1A1A;
+    }
+
+    .error-msg {
+      color: #c0392b;
+      font-size: 0.9rem;
+      margin-bottom: 14px;
+      display: none;
+    }
+
+    .email-label {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1A1A1A;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .email-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      color: #1A1A1A;
+      margin-bottom: 24px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .email-input:focus { border-color: #4DB6AC; }
+    .email-input::placeholder { color: #aaa; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #4DB6AC;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 14px 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn:hover { background: #3da89e; }
+    .btn:disabled { background: #a0cdc9; cursor: not-allowed; }
+
+    .thankyou-heading {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .thankyou-body {
+      font-size: 1rem;
+      color: #1A1A1A;
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+
+    .thankyou-accent {
+      font-size: 1rem;
+      color: #807124;
+      font-weight: 400;
+    }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 1.8rem; }
+      .quiz-wrap { padding: 40px 20px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <p>Custom Skincare Matters.<br><a href="https://mivera.skin">mivera.skin</a></p>
+  </header>
+
+  <div class="quiz-wrap">
+
+    <!-- Page 1: Intro -->
+    <div class="page active" id="page-1">
+      <h1>What's Happening to Your Skin?</h1>
+      <h2>Your skin didn't get worse. It changed.</h2>
+      <p class="sub">3 questions to find out what it needs now.</p>
+      <button class="btn" onclick="goTo('page-2')">Next &rarr;</button>
+    </div>
+
+    <!-- Page 2: Q1 -->
+    <div class="page" id="page-2">
+      <p class="question">Which sounds most like your skin right now?</p>
+      <div class="options" id="q1-options">
+        <div class="option" data-value="A" onclick="selectOption('q1', this)">
+          <span class="option-letter">A</span>
+          <span class="option-text">Breaking out in places it never did before</span>
+        </div>
+        <div class="option" data-value="B" onclick="selectOption('q1', this)">
+          <span class="option-letter">B</span>
+          <span class="option-text">Dry in a way no moisturizer actually fixes</span>
+        </div>
+        <div class="option" data-value="C" onclick="selectOption('q1', this)">
+          <span class="option-letter">C</span>
+          <span class="option-text">Sensitive to products that used to work fine</span>
+        </div>
+        <div class="option" data-value="D" onclick="selectOption('q1', this)">
+          <span class="option-letter">D</span>
+          <span class="option-text">Lost firmness or texture I can't explain</span>
+        </div>
+      </div>
+      <p class="error-msg" id="q1-error">Please select an option to continue.</p>
+      <button class="btn" onclick="nextWithValidation('q1', 'page-3')">Next &rarr;</button>
+    </div>
+
+    <!-- Page 3: Q2 -->
+    <div class="page" id="page-3">
+      <p class="question">How long has this been happening?</p>
+      <div class="options" id="q2-options">
+        <div class="option" data-value="A" onclick="selectOption('q2', this)">
+          <span class="option-letter">A</span>
+          <span class="option-text">Less than 6 months</span>
+        </div>
+        <div class="option" data-value="B" onclick="selectOption('q2', this)">
+          <span class="option-letter">B</span>
+          <span class="option-text">6 months to 2 years</span>
+        </div>
+        <div class="option" data-value="C" onclick="selectOption('q2', this)">
+          <span class="option-letter">C</span>
+          <span class="option-text">More than 2 years</span>
+        </div>
+      </div>
+      <p class="error-msg" id="q2-error">Please select an option to continue.</p>
+      <button class="btn" onclick="nextWithValidation('q2', 'page-4')">Next &rarr;</button>
+    </div>
+
+    <!-- Page 4: Q3 -->
+    <div class="page" id="page-4">
+      <p class="question">What have you done about it?</p>
+      <div class="options" id="q3-options">
+        <div class="option" data-value="A" onclick="selectOption('q3', this)">
+          <span class="option-letter">A</span>
+          <span class="option-text">Tried everything...nothing works</span>
+        </div>
+        <div class="option" data-value="B" onclick="selectOption('q3', this)">
+          <span class="option-letter">B</span>
+          <span class="option-text">A few things... some help, some make it worse</span>
+        </div>
+        <div class="option" data-value="C" onclick="selectOption('q3', this)">
+          <span class="option-letter">C</span>
+          <span class="option-text">I've mostly stopped trying new products</span>
+        </div>
+      </div>
+      <p class="error-msg" id="q3-error">Please select an option to continue.</p>
+      <button class="btn" onclick="nextWithValidation('q3', 'page-5')">Next &rarr;</button>
+    </div>
+
+    <!-- Page 5: Email -->
+    <div class="page" id="page-5">
+      <label class="email-label" for="email-input">Where should we send your results?</label>
+      <input
+        class="email-input"
+        type="email"
+        id="email-input"
+        placeholder="Your email address"
+        autocomplete="email"
+      />
+      <p class="error-msg" id="email-error">Please enter a valid email address.</p>
+      <button class="btn" id="submit-btn" onclick="handleSubmit()">Send Me My Results &rarr;</button>
+    </div>
+
+    <!-- Page 6: Thank You -->
+    <div class="page" id="page-6">
+      <p class="thankyou-heading">You're in.</p>
+      <p class="thankyou-body">
+        We'll reach out with your skin type shortly. Before Mivera builds anything, we want to
+        understand your skin first, so expect to hear from us directly.
+      </p>
+      <p class="thankyou-accent">This isn't a waitlist. You're part of what gets built.</p>
+    </div>
+
+  </div>
+
+  <script>
+    const answers = { q1: null, q2: null, q3: null };
+
+    function goTo(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      window.scrollTo(0, 0);
+    }
+
+    function selectOption(question, el) {
+      const group = document.getElementById(question + '-options');
+      group.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      answers[question] = el.dataset.value;
+      document.getElementById(question + '-error').style.display = 'none';
+    }
+
+    function nextWithValidation(question, nextPage) {
+      if (!answers[question]) {
+        document.getElementById(question + '-error').style.display = 'block';
+        return;
+      }
+      goTo(nextPage);
+    }
+
+    function getSkinType() {
+      const q1 = answers.q1;
+      if (q1 === 'A' || q1 === 'C') return 'Reactive Transition Skin';
+      if (q1 === 'B') return 'Barrier-Stripped Skin';
+      if (q1 === 'D') return 'Structural Shift Skin';
+      return 'Unknown';
+    }
+
+    function isValidEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    async function handleSubmit() {
+      const emailInput = document.getElementById('email-input');
+      const email = emailInput.value.trim();
+      const errorEl = document.getElementById('email-error');
+      const btn = document.getElementById('submit-btn');
+
+      if (!isValidEmail(email)) {
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      errorEl.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      const q1Labels = {
+        A: 'Breaking out in places it never did before',
+        B: 'Dry in a way no moisturizer actually fixes',
+        C: 'Sensitive to products that used to work fine',
+        D: "Lost firmness or texture I can't explain"
+      };
+      const q2Labels = {
+        A: 'Less than 6 months',
+        B: '6 months to 2 years',
+        C: 'More than 2 years'
+      };
+      const q3Labels = {
+        A: 'Tried everything...nothing works',
+        B: 'A few things... some help, some make it worse',
+        C: "I've mostly stopped trying new products"
+      };
+
+      try {
+        const res = await fetch('/.netlify/functions/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            q1: q1Labels[answers.q1],
+            q2: q2Labels[answers.q2],
+            q3: q3Labels[answers.q3],
+            skinType: getSkinType()
+          })
+        });
+
+        if (!res.ok) throw new Error('Server error');
+        goTo('page-6');
+      } catch {
+        btn.disabled = false;
+        btn.textContent = 'Send Me My Results →';
+        errorEl.textContent = 'Something went wrong. Please try again.';
+        errorEl.style.display = 'block';
+      }
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,22 @@
+# Markdown files
+*.md
+
+# Screenshots and images
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+
+# JSON strategy files (internal, not for deployment)
+INSTRUCTIONS.md
+pinterest_pins.json
+videos.json
+growth_strategy.json
+
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.local
