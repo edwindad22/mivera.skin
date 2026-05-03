@@ -14,6 +14,7 @@ pinterest_pins.json
 videos.json
 growth_strategy.json
 
+.DS_Store
 # Dependencies
 node_modules/
 
