@@ -329,20 +329,20 @@
     <div class="page" id="page-3">
       <p class="question">How long has this been happening?</p>
       <div class="options" id="q2-options">
-        <div class="option" data-value="A" onclick="selectOption('q2', this)">
+        <div class="option" data-value="A" onclick="selectSingle('q2', this)">
           <span class="option-letter">A</span>
           <span class="option-text">Less than 6 months</span>
         </div>
-        <div class="option" data-value="B" onclick="selectOption('q2', this)">
+        <div class="option" data-value="B" onclick="selectSingle('q2', this)">
           <span class="option-letter">B</span>
           <span class="option-text">6 months to 2 years</span>
         </div>
-        <div class="option" data-value="C" onclick="selectOption('q2', this)">
+        <div class="option" data-value="C" onclick="selectSingle('q2', this)">
           <span class="option-letter">C</span>
           <span class="option-text">More than 2 years</span>
         </div>
       </div>
-      <p class="error-msg" id="q2-error">Please select at least one option to continue.</p>
+      <p class="error-msg" id="q2-error">Please select an option to continue.</p>
       <div class="btn-row">
         <button class="btn-back" onclick="goBack()">&larr; Back</button>
         <button class="btn" onclick="nextWithValidation('q2', 'page-4')">Next &rarr;</button>
@@ -353,20 +353,20 @@
     <div class="page" id="page-4">
       <p class="question">What have you done about it?</p>
       <div class="options" id="q3-options">
-        <div class="option" data-value="A" onclick="selectOption('q3', this)">
+        <div class="option" data-value="A" onclick="selectSingle('q3', this)">
           <span class="option-letter">A</span>
           <span class="option-text">Tried everything...nothing works</span>
         </div>
-        <div class="option" data-value="B" onclick="selectOption('q3', this)">
+        <div class="option" data-value="B" onclick="selectSingle('q3', this)">
           <span class="option-letter">B</span>
           <span class="option-text">A few things... some help, some make it worse</span>
         </div>
-        <div class="option" data-value="C" onclick="selectOption('q3', this)">
+        <div class="option" data-value="C" onclick="selectSingle('q3', this)">
           <span class="option-letter">C</span>
           <span class="option-text">I've mostly stopped trying new products</span>
         </div>
       </div>
-      <p class="error-msg" id="q3-error">Please select at least one option to continue.</p>
+      <p class="error-msg" id="q3-error">Please select an option to continue.</p>
       <div class="btn-row">
         <button class="btn-back" onclick="goBack()">&larr; Back</button>
         <button class="btn" onclick="nextWithValidation('q3', 'page-5')">Next &rarr;</button>
@@ -398,6 +398,7 @@
         understand your skin first, so expect to hear from us directly.
       </p>
       <p class="thankyou-accent">This isn't a waitlist. You're part of what gets built.</p>
+      <p class="thankyou-body" style="font-size:0.9rem; color:#999; margin-bottom:16px;">Check your spam folder if you don't see our email within a few minutes.</p>
       <p class="countdown-msg" id="countdown-msg">Redirecting to Mivera in <strong id="countdown-num">10</strong>s</p>
       <a class="btn-proceed" href="https://mivera.skin">Proceed to Mivera &rarr;</a>
     </div>
@@ -471,6 +472,13 @@
         el.classList.add('selected');
       }
 
+      document.getElementById(question + '-error').style.display = 'none';
+    }
+
+    function selectSingle(question, el) {
+      document.querySelectorAll('#' + question + '-options .option').forEach(o => o.classList.remove('selected'));
+      answers[question] = [el.dataset.value];
+      el.classList.add('selected');
       document.getElementById(question + '-error').style.display = 'none';
     }
 
